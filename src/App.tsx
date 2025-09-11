@@ -410,9 +410,19 @@ function WorldClock() {
       )
     )
     
-    const popupHeight = settings.showAnalog 
-      ? settings.analogClockSize + 250 
-      : 200
+    // Calculate popup height more accurately based on content
+    let popupHeight = 40 + 48 // body padding (20*2) + container padding (24*2)
+    popupHeight += settings.countryNameSize + 4 // country name + margin
+    popupHeight += settings.cityNameSize + 4 // city name + margin  
+    popupHeight += settings.timeZoneSize + 16 // timezone + margin
+    popupHeight += settings.digitalDateSize + 8 // date + margin
+    popupHeight += settings.digitalTimeSize + (settings.showAnalog ? 20 : 0) // time + margin
+    
+    if (settings.showAnalog) {
+      popupHeight += settings.analogClockSize + 16 + 32 // analog clock + margin + decoration space
+    }
+    
+    popupHeight += 40 // extra buffer for safe display
 
     // Center the popup on screen
     const left = (window.screen.width - popupWidth) / 2
