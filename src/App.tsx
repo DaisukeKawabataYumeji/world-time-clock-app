@@ -6,7 +6,9 @@ import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Plus, Gear, X, CaretDown, CaretRight } from '@phosphor-icons/react'
+import { Plus, Gear, X, CaretDown, CaretRight, FloppyDisk } from '@phosphor-icons/react'
+import { toast } from 'sonner'
+import { Toaster } from '@/components/ui/sonner'
 
 interface TimeZoneInfo {
   id: string
@@ -109,6 +111,7 @@ function WorldClock() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
   const [configSections, setConfigSections] = useState({
     common: true,
@@ -192,6 +195,23 @@ function WorldClock() {
     
     setDraggedIndex(null)
     setDragOverIndex(null)
+  }
+
+  const saveSettingsToServer = async () => {
+    setIsSaving(true)
+    try {
+      // Save settings to server using spark.kv API
+      await spark.kv.set('world-clock-server-settings', settings)
+      await spark.kv.set('world-clock-server-timezones', activeTimeZones)
+      
+      // Show success notification
+      toast.success('Settings saved to server successfully!')
+    } catch (error) {
+      console.error('Failed to save settings to server:', error)
+      toast.error('Failed to save settings to server')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const AnalogClock = ({ timezone, size }: { timezone: TimeZoneInfo; size: number }) => {
@@ -522,6 +542,7 @@ function WorldClock() {
 
   return (
     <div className="min-h-screen bg-background p-4">
+      <Toaster />
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between mb-10">
           <h1 className="text-4xl font-bold text-foreground">World Clock</h1>
@@ -533,6 +554,19 @@ function WorldClock() {
               className="text-3xl p-2"
             >
               ➕
+            </Button>
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={saveSettingsToServer}
+              disabled={isSaving}
+              className="text-2xl p-2 hover:bg-accent/50"
+              title="Save settings to server"
+            >
+              <FloppyDisk 
+                size={28} 
+                className={`${isSaving ? 'animate-pulse' : ''} text-primary`}
+              />
             </Button>
             <Button
               variant="ghost"
