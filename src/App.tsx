@@ -1072,6 +1072,12 @@ function WorldClock() {
               const designStyles = getDesignStyles(currentSettings.analogClockDesign);
               const analogClockSize = currentSettings.analogClockSize;
               
+              // Account for border width in calculations
+              const borderWidth = 4;
+              const innerSize = analogClockSize - (borderWidth * 2);
+              const centerX = analogClockSize / 2;
+              const centerY = analogClockSize / 2;
+              
               analogContainer.innerHTML = \`
                 <div style="position: relative; display: flex; align-items: center; justify-content: center; width: \${analogClockSize + 16}px; height: \${analogClockSize + 16}px;">
                   <div style="
@@ -1098,29 +1104,30 @@ function WorldClock() {
                     
                     \${currentSettings.analogNumberSize ? Array.from({ length: 12 }, (_, i) => {
                       const angle = (i + 1) * 30 - 90;
-                      const x = analogClockSize/2 + (analogClockSize/2 - 30) * Math.cos(angle * Math.PI / 180);
-                      const y = analogClockSize/2 + (analogClockSize/2 - 30) * Math.sin(angle * Math.PI / 180);
+                      const radius = (innerSize / 2) - 30;
+                      const x = centerX + radius * Math.cos(angle * Math.PI / 180);
+                      const y = centerY + radius * Math.sin(angle * Math.PI / 180);
                       return \`<text x="\${x}" y="\${y}" text-anchor="middle" dominant-baseline="central" 
                         font-size="\${currentSettings.analogNumberFontSize}" font-family="\${currentSettings.fontFamily}" 
                         fill="\${currentSettings.analogClockColor}" font-weight="bold" filter="url(#shadow)">\${i + 1}</text>\`;
                     }).join('') : ''}
                     
-                    <line x1="\${analogClockSize/2}" y1="\${analogClockSize/2}"
-                          x2="\${analogClockSize/2 + (analogClockSize/4) * Math.cos((hourAngle - 90) * Math.PI / 180)}"
-                          y2="\${analogClockSize/2 + (analogClockSize/4) * Math.sin((hourAngle - 90) * Math.PI / 180)}"
+                    <line x1="\${centerX}" y1="\${centerY}"
+                          x2="\${centerX + (innerSize/4) * Math.cos((hourAngle - 90) * Math.PI / 180)}"
+                          y2="\${centerY + (innerSize/4) * Math.sin((hourAngle - 90) * Math.PI / 180)}"
                           stroke="\${currentSettings.analogClockColor}" stroke-width="6" stroke-linecap="round" filter="url(#shadow)" />
                     
-                    <line x1="\${analogClockSize/2}" y1="\${analogClockSize/2}"
-                          x2="\${analogClockSize/2 + (analogClockSize/3) * Math.cos((minuteAngle - 90) * Math.PI / 180)}"
-                          y2="\${analogClockSize/2 + (analogClockSize/3) * Math.sin((minuteAngle - 90) * Math.PI / 180)}"
+                    <line x1="\${centerX}" y1="\${centerY}"
+                          x2="\${centerX + (innerSize/3) * Math.cos((minuteAngle - 90) * Math.PI / 180)}"
+                          y2="\${centerY + (innerSize/3) * Math.sin((minuteAngle - 90) * Math.PI / 180)}"
                           stroke="\${currentSettings.analogClockColor}" stroke-width="4" stroke-linecap="round" filter="url(#shadow)" />
                     
-                    \${currentSettings.showAnalogSeconds ? \`<line x1="\${analogClockSize/2}" y1="\${analogClockSize/2}"
-                          x2="\${analogClockSize/2 + (analogClockSize/2.5) * Math.cos((secondAngle - 90) * Math.PI / 180)}"
-                          y2="\${analogClockSize/2 + (analogClockSize/2.5) * Math.sin((secondAngle - 90) * Math.PI / 180)}"
+                    \${currentSettings.showAnalogSeconds ? \`<line x1="\${centerX}" y1="\${centerY}"
+                          x2="\${centerX + (innerSize/2.5) * Math.cos((secondAngle - 90) * Math.PI / 180)}"
+                          y2="\${centerY + (innerSize/2.5) * Math.sin((secondAngle - 90) * Math.PI / 180)}"
                           stroke="#ef4444" stroke-width="2" stroke-linecap="round" filter="url(#shadow)" />\` : ''}
                     
-                    <circle cx="\${analogClockSize/2}" cy="\${analogClockSize/2}" r="8" 
+                    <circle cx="\${centerX}" cy="\${centerY}" r="8" 
                             fill="\${currentSettings.analogClockColor}" filter="url(#shadow)" />
                   </svg>
                 </div>
@@ -1444,6 +1451,12 @@ function WorldClock() {
 
     const designStyles = getDesignStyles(settings.analogClockDesign)
 
+    // Account for border width in calculations
+    const borderWidth = 4
+    const innerSize = size - (borderWidth * 2)
+    const centerX = size / 2
+    const centerY = size / 2
+    
     return (
       <div className="relative flex items-center justify-center" style={{ width: size + 16, height: size + 16 }}>
         <div 
@@ -1474,8 +1487,9 @@ function WorldClock() {
           
           {settings.analogNumberSize && Array.from({ length: 12 }, (_, i) => {
             const angle = (i + 1) * 30 - 90
-            const x = size/2 + (size/2 - 30) * Math.cos(angle * Math.PI / 180)
-            const y = size/2 + (size/2 - 30) * Math.sin(angle * Math.PI / 180)
+            const radius = (innerSize / 2) - 30
+            const x = centerX + radius * Math.cos(angle * Math.PI / 180)
+            const y = centerY + radius * Math.sin(angle * Math.PI / 180)
             return (
               <text
                 key={i}
@@ -1495,10 +1509,10 @@ function WorldClock() {
           })}
 
           <line
-            x1={size/2}
-            y1={size/2}
-            x2={size/2 + (size/4) * Math.cos((hourAngle - 90) * Math.PI / 180)}
-            y2={size/2 + (size/4) * Math.sin((hourAngle - 90) * Math.PI / 180)}
+            x1={centerX}
+            y1={centerY}
+            x2={centerX + (innerSize/4) * Math.cos((hourAngle - 90) * Math.PI / 180)}
+            y2={centerY + (innerSize/4) * Math.sin((hourAngle - 90) * Math.PI / 180)}
             stroke={settings.analogClockColor}
             strokeWidth="6"
             strokeLinecap="round"
@@ -1506,10 +1520,10 @@ function WorldClock() {
           />
 
           <line
-            x1={size/2}
-            y1={size/2}
-            x2={size/2 + (size/3) * Math.cos((minuteAngle - 90) * Math.PI / 180)}
-            y2={size/2 + (size/3) * Math.sin((minuteAngle - 90) * Math.PI / 180)}
+            x1={centerX}
+            y1={centerY}
+            x2={centerX + (innerSize/3) * Math.cos((minuteAngle - 90) * Math.PI / 180)}
+            y2={centerY + (innerSize/3) * Math.sin((minuteAngle - 90) * Math.PI / 180)}
             stroke={settings.analogClockColor}
             strokeWidth="4"
             strokeLinecap="round"
@@ -1518,10 +1532,10 @@ function WorldClock() {
 
           {settings.showAnalogSeconds && (
             <line
-              x1={size/2}
-              y1={size/2}
-              x2={size/2 + (size/2.5) * Math.cos((secondAngle - 90) * Math.PI / 180)}
-              y2={size/2 + (size/2.5) * Math.sin((secondAngle - 90) * Math.PI / 180)}
+              x1={centerX}
+              y1={centerY}
+              x2={centerX + (innerSize/2.5) * Math.cos((secondAngle - 90) * Math.PI / 180)}
+              y2={centerY + (innerSize/2.5) * Math.sin((secondAngle - 90) * Math.PI / 180)}
               stroke="#ef4444"
               strokeWidth="2"
               strokeLinecap="round"
@@ -1530,8 +1544,8 @@ function WorldClock() {
           )}
 
           <circle
-            cx={size/2}
-            cy={size/2}
+            cx={centerX}
+            cy={centerY}
             r="8"
             fill={settings.analogClockColor}
             filter="url(#shadow)"
