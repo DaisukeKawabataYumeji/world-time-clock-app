@@ -316,7 +316,7 @@ function WorldClock() {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [openPopups, setOpenPopups] = useState<Map<string, Window>>(new Map())
-  const [converterTimes, setConverterTimes] = useState<{[key: string]: { date: string; time: string }}>>({})
+  const [converterTimes, setConverterTimes] = useState<{[key: string]: { date: string; time: string }}>({})
 
   const [configSections, setConfigSections] = useState({
     common: true,
