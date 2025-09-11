@@ -1293,7 +1293,12 @@ function WorldClock() {
       <Toaster />
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between mb-10">
-          <h1 className="text-4xl font-bold text-foreground">World Clock</h1>
+          <h1 
+            className="text-4xl font-bold text-foreground"
+            style={{ fontFamily: settings.fontFamily }}
+          >
+            Daisuke World Clock
+          </h1>
           <div className="flex items-center gap-4">
             {user && (
               <div className="flex items-center gap-2">
@@ -1711,7 +1716,7 @@ function WorldClockApp() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-2">World Clock</div>
+          <div className="text-2xl font-bold mb-2">Daisuke World Clock</div>
           <div className="text-muted-foreground">Loading...</div>
         </div>
       </div>
