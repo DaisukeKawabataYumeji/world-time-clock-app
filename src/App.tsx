@@ -1297,7 +1297,7 @@ function WorldClock() {
             className="text-4xl font-bold text-foreground"
             style={{ fontFamily: settings.fontFamily }}
           >
-            Daisuke World Clock
+            Daisuke Clock
           </h1>
           <div className="flex items-center gap-4">
             {user && (
@@ -1716,7 +1716,7 @@ function WorldClockApp() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-2xl font-bold mb-2">Daisuke World Clock</div>
+          <div className="text-2xl font-bold mb-2">Daisuke Clock</div>
           <div className="text-muted-foreground">Loading...</div>
         </div>
       </div>
