@@ -2096,7 +2096,7 @@ function WorldClock() {
                     </div>
                     <div>
                       <label className="block text-xs text-muted-foreground mb-1">Day</label>
-                      <div className="px-3 py-2 text-sm bg-background border rounded-md">
+                      <div className="px-3 py-2 text-sm bg-input border border-input rounded-md">
                         {converterTimes[timezone.id]?.date ? getWeekdayFromDate(converterTimes[timezone.id].date) : ''}
                       </div>
                     </div>
