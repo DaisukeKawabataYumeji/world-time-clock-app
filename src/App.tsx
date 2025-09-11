@@ -662,11 +662,11 @@ function WorldClock() {
                 size="lg"
                 onClick={saveSettingsToServer}
                 disabled={isSaving || !user}
-                className="text-2xl p-2 hover:bg-accent/50"
+                className="text-3xl p-2 hover:bg-accent/50"
                 title={user ? "Save settings to server" : "Login required to save settings"}
               >
                 <FloppyDisk 
-                  size={28} 
+                  size={36} 
                   className={`${isSaving ? 'animate-pulse' : ''} ${user ? 'text-primary' : 'text-muted-foreground'}`}
                 />
               </Button>
