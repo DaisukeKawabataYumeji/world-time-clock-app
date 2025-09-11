@@ -497,7 +497,7 @@ function WorldClock() {
 
     // Create popup window with minimal features and no URL field
     const popup = window.open(
-      'about:blank', 
+      '', 
       `clock-${timezone.id}`,
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=no,menubar=no,toolbar=no,location=no,status=no,addressbar=no`
     )
