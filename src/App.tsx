@@ -403,7 +403,126 @@ function WorldClock() {
   }
 
   const getCurrentTimeZoneAbbreviation = (timeZone: string) => {
-    // Get the current timezone name including DST info
+    // Predefined timezone abbreviations mapping
+    const timezoneAbbreviations: Record<string, string> = {
+      'Asia/Tokyo': 'JST',
+      'Asia/Kolkata': 'IST', 
+      'Asia/Yangon': 'MMT',
+      'Asia/Shanghai': 'CST',
+      'America/New_York': 'EST/EDT',
+      'America/Los_Angeles': 'PST/PDT',
+      'America/Chicago': 'CST/CDT',
+      'America/Denver': 'MST/MDT',
+      'America/Phoenix': 'MST',
+      'Pacific/Honolulu': 'HST',
+      'America/Anchorage': 'AKST/AKDT',
+      'America/Toronto': 'EST/EDT',
+      'America/Vancouver': 'PST/PDT',
+      'America/Montreal': 'EST/EDT',
+      'America/Edmonton': 'MST/MDT',
+      'America/Mexico_City': 'CST/CDT',
+      'America/Sao_Paulo': 'BRT/BRST',
+      'America/Argentina/Buenos_Aires': 'ART',
+      'America/Lima': 'PET',
+      'America/Bogota': 'COT',
+      'America/Santiago': 'CLT/CLST',
+      'America/Caracas': 'VET',
+      'Europe/London': 'GMT/BST',
+      'Europe/Paris': 'CET/CEST',
+      'Europe/Berlin': 'CET/CEST',
+      'Europe/Madrid': 'CET/CEST',
+      'Europe/Rome': 'CET/CEST',
+      'Europe/Amsterdam': 'CET/CEST',
+      'Europe/Brussels': 'CET/CEST',
+      'Europe/Vienna': 'CET/CEST',
+      'Europe/Zurich': 'CET/CEST',
+      'Europe/Stockholm': 'CET/CEST',
+      'Europe/Oslo': 'CET/CEST',
+      'Europe/Copenhagen': 'CET/CEST',
+      'Europe/Helsinki': 'EET/EEST',
+      'Europe/Warsaw': 'CET/CEST',
+      'Europe/Prague': 'CET/CEST',
+      'Europe/Budapest': 'CET/CEST',
+      'Europe/Athens': 'EET/EEST',
+      'Europe/Istanbul': 'TRT',
+      'Europe/Moscow': 'MSK',
+      'Europe/Dublin': 'GMT/IST',
+      'Europe/Lisbon': 'WET/WEST',
+      'Asia/Hong_Kong': 'HKT',
+      'Asia/Singapore': 'SGT',
+      'Asia/Seoul': 'KST',
+      'Asia/Taipei': 'CST',
+      'Asia/Bangkok': 'ICT',
+      'Asia/Manila': 'PHT',
+      'Asia/Kuala_Lumpur': 'MYT',
+      'Asia/Jakarta': 'WIB',
+      'Asia/Ho_Chi_Minh': 'ICT',
+      'Asia/Karachi': 'PKT',
+      'Asia/Dhaka': 'BST',
+      'Asia/Colombo': 'SLST',
+      'Asia/Phnom_Penh': 'ICT',
+      'Asia/Vientiane': 'ICT',
+      'Asia/Jerusalem': 'IST/IDT',
+      'Asia/Dubai': 'GST',
+      'Asia/Riyadh': 'AST',
+      'Asia/Kuwait': 'AST',
+      'Asia/Qatar': 'AST',
+      'Asia/Tehran': 'IRST/IRDT',
+      'Australia/Sydney': 'AEST/AEDT',
+      'Australia/Melbourne': 'AEST/AEDT',
+      'Australia/Brisbane': 'AEST',
+      'Australia/Perth': 'AWST',
+      'Australia/Adelaide': 'ACST/ACDT',
+      'Australia/Darwin': 'ACST',
+      'Pacific/Auckland': 'NZST/NZDT'
+    }
+    
+    const predefinedAbbr = timezoneAbbreviations[timeZone]
+    
+    // If no DST (no slash), return the abbreviation directly
+    if (predefinedAbbr && !predefinedAbbr.includes('/')) {
+      return predefinedAbbr
+    }
+    
+    // For zones with DST, determine which abbreviation to show
+    if (predefinedAbbr && predefinedAbbr.includes('/')) {
+      const [winter, summer] = predefinedAbbr.split('/')
+      
+      // Check if we're currently in DST
+      const now = new Date()
+      const january = new Date(now.getFullYear(), 0, 1)
+      const july = new Date(now.getFullYear(), 6, 1)
+      
+      const janFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        timeZoneName: 'short'
+      })
+      const julyFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        timeZoneName: 'short'
+      })
+      const currentFormatter = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        timeZoneName: 'short'
+      })
+      
+      const janParts = janFormatter.formatToParts(january)
+      const julyParts = julyFormatter.formatToParts(july)
+      const currentParts = currentFormatter.formatToParts(currentTime)
+      
+      const janOffset = janParts.find(part => part.type === 'timeZoneName')?.value
+      const julyOffset = julyParts.find(part => part.type === 'timeZoneName')?.value
+      const currentOffset = currentParts.find(part => part.type === 'timeZoneName')?.value
+      
+      // If current matches July (summer) and differs from January, use summer abbreviation
+      if (currentOffset === julyOffset && currentOffset !== janOffset) {
+        return summer
+      } else {
+        return winter
+      }
+    }
+    
+    // Fallback to browser's timezone name
     const formatter = new Intl.DateTimeFormat('en-US', {
       timeZone,
       timeZoneName: 'short'
@@ -610,6 +729,126 @@ function WorldClock() {
             let currentSettings = ${JSON.stringify(settings)};
             
             function getCurrentTimeZoneAbbreviation(timeZone) {
+              // Predefined timezone abbreviations
+              const timezoneAbbreviations = {
+                'Asia/Tokyo': 'JST',
+                'Asia/Kolkata': 'IST', 
+                'Asia/Yangon': 'MMT',
+                'Asia/Shanghai': 'CST',
+                'America/New_York': 'EST/EDT',
+                'America/Los_Angeles': 'PST/PDT',
+                'America/Chicago': 'CST/CDT',
+                'America/Denver': 'MST/MDT',
+                'America/Phoenix': 'MST',
+                'Pacific/Honolulu': 'HST',
+                'America/Anchorage': 'AKST/AKDT',
+                'America/Toronto': 'EST/EDT',
+                'America/Vancouver': 'PST/PDT',
+                'America/Montreal': 'EST/EDT',
+                'America/Edmonton': 'MST/MDT',
+                'America/Mexico_City': 'CST/CDT',
+                'America/Sao_Paulo': 'BRT/BRST',
+                'America/Argentina/Buenos_Aires': 'ART',
+                'America/Lima': 'PET',
+                'America/Bogota': 'COT',
+                'America/Santiago': 'CLT/CLST',
+                'America/Caracas': 'VET',
+                'Europe/London': 'GMT/BST',
+                'Europe/Paris': 'CET/CEST',
+                'Europe/Berlin': 'CET/CEST',
+                'Europe/Madrid': 'CET/CEST',
+                'Europe/Rome': 'CET/CEST',
+                'Europe/Amsterdam': 'CET/CEST',
+                'Europe/Brussels': 'CET/CEST',
+                'Europe/Vienna': 'CET/CEST',
+                'Europe/Zurich': 'CET/CEST',
+                'Europe/Stockholm': 'CET/CEST',
+                'Europe/Oslo': 'CET/CEST',
+                'Europe/Copenhagen': 'CET/CEST',
+                'Europe/Helsinki': 'EET/EEST',
+                'Europe/Warsaw': 'CET/CEST',
+                'Europe/Prague': 'CET/CEST',
+                'Europe/Budapest': 'CET/CEST',
+                'Europe/Athens': 'EET/EEST',
+                'Europe/Istanbul': 'TRT',
+                'Europe/Moscow': 'MSK',
+                'Europe/Dublin': 'GMT/IST',
+                'Europe/Lisbon': 'WET/WEST',
+                'Asia/Hong_Kong': 'HKT',
+                'Asia/Singapore': 'SGT',
+                'Asia/Seoul': 'KST',
+                'Asia/Taipei': 'CST',
+                'Asia/Bangkok': 'ICT',
+                'Asia/Manila': 'PHT',
+                'Asia/Kuala_Lumpur': 'MYT',
+                'Asia/Jakarta': 'WIB',
+                'Asia/Ho_Chi_Minh': 'ICT',
+                'Asia/Karachi': 'PKT',
+                'Asia/Dhaka': 'BST',
+                'Asia/Colombo': 'SLST',
+                'Asia/Phnom_Penh': 'ICT',
+                'Asia/Vientiane': 'ICT',
+                'Asia/Jerusalem': 'IST/IDT',
+                'Asia/Dubai': 'GST',
+                'Asia/Riyadh': 'AST',
+                'Asia/Kuwait': 'AST',
+                'Asia/Qatar': 'AST',
+                'Asia/Tehran': 'IRST/IRDT',
+                'Australia/Sydney': 'AEST/AEDT',
+                'Australia/Melbourne': 'AEST/AEDT',
+                'Australia/Brisbane': 'AEST',
+                'Australia/Perth': 'AWST',
+                'Australia/Adelaide': 'ACST/ACDT',
+                'Australia/Darwin': 'ACST',
+                'Pacific/Auckland': 'NZST/NZDT'
+              };
+              
+              const predefinedAbbr = timezoneAbbreviations[timeZone];
+              
+              // If no DST (no slash), return the abbreviation directly
+              if (predefinedAbbr && !predefinedAbbr.includes('/')) {
+                return predefinedAbbr;
+              }
+              
+              // For zones with DST, determine which abbreviation to show
+              if (predefinedAbbr && predefinedAbbr.includes('/')) {
+                const [winter, summer] = predefinedAbbr.split('/');
+                
+                // Check if we're currently in DST
+                const now = new Date();
+                const january = new Date(now.getFullYear(), 0, 1);
+                const july = new Date(now.getFullYear(), 6, 1);
+                
+                const janFormatter = new Intl.DateTimeFormat('en-US', {
+                  timeZone: timeZone,
+                  timeZoneName: 'short'
+                });
+                const julyFormatter = new Intl.DateTimeFormat('en-US', {
+                  timeZone: timeZone,
+                  timeZoneName: 'short'
+                });
+                const currentFormatter = new Intl.DateTimeFormat('en-US', {
+                  timeZone: timeZone,
+                  timeZoneName: 'short'
+                });
+                
+                const janParts = janFormatter.formatToParts(january);
+                const julyParts = julyFormatter.formatToParts(july);
+                const currentParts = currentFormatter.formatToParts(now);
+                
+                const janOffset = janParts.find(part => part.type === 'timeZoneName')?.value;
+                const julyOffset = julyParts.find(part => part.type === 'timeZoneName')?.value;
+                const currentOffset = currentParts.find(part => part.type === 'timeZoneName')?.value;
+                
+                // If current matches July (summer) and differs from January, use summer abbreviation
+                if (currentOffset === julyOffset && currentOffset !== janOffset) {
+                  return summer;
+                } else {
+                  return winter;
+                }
+              }
+              
+              // Fallback to browser's timezone name
               const formatter = new Intl.DateTimeFormat('en-US', {
                 timeZone: timeZone,
                 timeZoneName: 'short'
