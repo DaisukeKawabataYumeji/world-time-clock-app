@@ -427,8 +427,14 @@ function WorldClock() {
     return (
       <div className="relative" style={{ width: size, height: size }}>
         <div 
-          className="absolute -inset-2 rounded-full"
-          style={{ background: designStyles.decoration }}
+          className="absolute rounded-full"
+          style={{ 
+            background: designStyles.decoration,
+            width: size + 16,
+            height: size + 16,
+            left: -8,
+            top: -8
+          }}
         />
         <svg 
           width={size} 
