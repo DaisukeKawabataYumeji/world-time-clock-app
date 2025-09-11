@@ -495,11 +495,11 @@ function WorldClock() {
     const left = (window.screen.width - popupWidth) / 2
     const top = (window.screen.height - popupHeight) / 2
 
-    // Create popup window with minimal features
+    // Create popup window with minimal features and no URL field
     const popup = window.open(
-      '', 
+      'about:blank', 
       `clock-${timezone.id}`,
-      `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=no,menubar=no,toolbar=no,location=no,status=no`
+      `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=no,menubar=no,toolbar=no,location=no,status=no,addressbar=no`
     )
 
     if (popup) {
