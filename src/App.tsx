@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { Plus, Gear, X, CaretDown, CaretRight, SignOut, User as UserIcon, Download, Database, HardDrives, CloudArrowUp } from '@phosphor-icons/react'
+import { Plus, Gear, X, CaretDown, CaretRight, SignOut, User as UserIcon, Download, Database, HardDrives, CloudArrowUp, FloppyDisk } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { UserProvider, useUser } from '@/contexts/UserContext'
@@ -665,7 +665,7 @@ function WorldClock() {
                 className="text-3xl p-2 hover:bg-accent/50"
                 title={user ? "Save settings to server" : "Login required to save settings"}
               >
-                <CloudArrowUp 
+                <FloppyDisk 
                   size={36} 
                   weight="fill"
                   className={`${isSaving ? 'animate-pulse' : ''} ${user ? 'text-primary' : 'text-muted-foreground'}`}
@@ -750,7 +750,7 @@ function WorldClock() {
                     disabled={isSaving}
                     className="flex items-center gap-2"
                   >
-                    <CloudArrowUp size={16} weight="fill" />
+                    <FloppyDisk size={16} weight="fill" />
                     Save to Server
                   </Button>
                 </div>
