@@ -402,6 +402,19 @@ function WorldClock() {
     }).formatToParts(currentTime)
   }
 
+  const getCurrentTimeZoneAbbreviation = (timeZone: string) => {
+    // Get the current timezone name including DST info
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      timeZoneName: 'short'
+    })
+    
+    const parts = formatter.formatToParts(currentTime)
+    const timeZonePart = parts.find(part => part.type === 'timeZoneName')
+    
+    return timeZonePart ? timeZonePart.value : ''
+  }
+
   const formatTime = (parts: Intl.DateTimeFormatPart[], includeSeconds: boolean) => {
     const time = parts.reduce((acc, part) => {
       acc[part.type] = part.value
@@ -433,7 +446,8 @@ function WorldClock() {
   const filteredTimeZones = availableTimeZones.filter(tz => 
     tz.city.toLowerCase().includes(searchText.toLowerCase()) ||
     tz.country.toLowerCase().includes(searchText.toLowerCase()) ||
-    tz.abbreviation.toLowerCase().includes(searchText.toLowerCase())
+    tz.abbreviation.toLowerCase().includes(searchText.toLowerCase()) ||
+    getCurrentTimeZoneAbbreviation(tz.timeZone).toLowerCase().includes(searchText.toLowerCase())
   )
 
   const handleDragStart = (index: number) => {
@@ -585,7 +599,7 @@ function WorldClock() {
           <div class="clock-container">
             <div class="country-name">${timezone.country}</div>
             <div class="city-name">${timezone.city}</div>
-            <div class="timezone-abbr">${timezone.abbreviation}</div>
+            <div class="timezone-abbr" id="timezone-abbr"></div>
             <div class="digital-date" id="date"></div>
             <div class="digital-time" id="time"></div>
             ${settings.showAnalog ? '<div class="analog-clock-container" id="analog-clock"></div>' : ''}
@@ -594,6 +608,18 @@ function WorldClock() {
           <script>
             const timezone = '${timezone.timeZone}';
             let currentSettings = ${JSON.stringify(settings)};
+            
+            function getCurrentTimeZoneAbbreviation(timeZone) {
+              const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: timeZone,
+                timeZoneName: 'short'
+              });
+              
+              const parts = formatter.formatToParts(new Date());
+              const timeZonePart = parts.find(part => part.type === 'timeZoneName');
+              
+              return timeZonePart ? timeZonePart.value : '';
+            }
             
             // Listen for settings updates from parent window
             window.addEventListener('message', function(event) {
@@ -782,6 +808,10 @@ function WorldClock() {
                 : timeData.hour + ':' + timeData.minute;
                 
               const dateStr = timeData.year + '-' + timeData.month + '-' + timeData.day + ' ' + timeData.weekday;
+              
+              // Update timezone abbreviation
+              const currentAbbr = getCurrentTimeZoneAbbreviation(timezone);
+              document.getElementById('timezone-abbr').textContent = currentAbbr;
               
               document.getElementById('date').textContent = dateStr;
               document.getElementById('time').textContent = timeStr;
@@ -1254,7 +1284,7 @@ function WorldClock() {
                 }}
                 className="text-muted-foreground"
               >
-                {timezone.abbreviation}
+                {getCurrentTimeZoneAbbreviation(timezone.timeZone)}
               </div>
             </div>
 
@@ -1397,7 +1427,7 @@ function WorldClock() {
                     <div>
                       <div className="font-medium">{tz.city}</div>
                       <div className="text-sm text-muted-foreground">
-                        {tz.country} • {tz.abbreviation}
+                        {tz.country} • {getCurrentTimeZoneAbbreviation(tz.timeZone)}
                       </div>
                     </div>
                   </div>
