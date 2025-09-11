@@ -1073,14 +1073,14 @@ function WorldClock() {
               const analogClockSize = currentSettings.analogClockSize;
               
               analogContainer.innerHTML = \`
-                <div style="position: relative; width: \${analogClockSize}px; height: \${analogClockSize}px;">
+                <div style="position: relative; display: flex; align-items: center; justify-content: center; width: \${analogClockSize + 16}px; height: \${analogClockSize + 16}px;">
                   <div style="
                     position: absolute;
                     background: \${designStyles.decoration};
                     width: \${analogClockSize + 16}px;
                     height: \${analogClockSize + 16}px;
-                    left: -8px;
-                    top: -8px;
+                    left: 0;
+                    top: 0;
                     border-radius: 50%;
                   "></div>
                   <svg width="\${analogClockSize}" height="\${analogClockSize}" style="
@@ -1445,15 +1445,15 @@ function WorldClock() {
     const designStyles = getDesignStyles(settings.analogClockDesign)
 
     return (
-      <div className="relative" style={{ width: size, height: size }}>
+      <div className="relative flex items-center justify-center" style={{ width: size + 16, height: size + 16 }}>
         <div 
           className="absolute rounded-full"
           style={{ 
             background: designStyles.decoration,
             width: size + 16,
             height: size + 16,
-            left: -8,
-            top: -8
+            left: 0,
+            top: 0
           }}
         />
         <svg 
