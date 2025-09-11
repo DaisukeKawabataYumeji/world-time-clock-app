@@ -674,6 +674,8 @@ function WorldClock() {
       popup.focus()
     }
   }
+
+  const saveSettingsToServer = async () => {
     if (!user) {
       toast.error('Please log in to save settings')
       return
