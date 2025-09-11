@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { Plus, Gear, X, CaretDown, CaretRight, SignOut, User as UserIcon, Download, Database, HardDrives, CloudArrowUp, FloppyDisk } from '@phosphor-icons/react'
+import { Plus, Gear, X, CaretDown, CaretRight, SignOut, User as UserIcon, Download, Database, HardDrives, CloudArrowUp } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { UserProvider, useUser } from '@/contexts/UserContext'
@@ -665,10 +665,13 @@ function WorldClock() {
                 className="text-3xl p-2 hover:bg-accent/50"
                 title={user ? "Save settings to server" : "Login required to save settings"}
               >
-                <FloppyDisk 
-                  size={36} 
-                  weight="fill"
-                  className={`${isSaving ? 'animate-pulse' : ''} ${user ? 'text-primary' : 'text-muted-foreground'}`}
+                <img 
+                  src="https://cdn.vectorstock.com/i/500p/31/53/diskette-line-icon-floppy-disk-vector-25003153.jpg"
+                  alt="Save"
+                  width={36}
+                  height={36}
+                  className={`${isSaving ? 'animate-pulse' : ''} ${user ? 'opacity-100' : 'opacity-50'}`}
+                  style={{ filter: user ? 'none' : 'grayscale(100%)' }}
                 />
               </Button>
               <Button
@@ -750,7 +753,12 @@ function WorldClock() {
                     disabled={isSaving}
                     className="flex items-center gap-2"
                   >
-                    <FloppyDisk size={16} weight="fill" />
+                    <img 
+                      src="https://cdn.vectorstock.com/i/500p/31/53/diskette-line-icon-floppy-disk-vector-25003153.jpg"
+                      alt="Save"
+                      width={16}
+                      height={16}
+                    />
                     Save to Server
                   </Button>
                 </div>
