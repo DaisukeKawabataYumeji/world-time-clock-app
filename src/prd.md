@@ -1,166 +1,133 @@
-# World Clock Application - Product Requirements Document
+# Daisuke Clock - Product Requirements Document
 
 ## Core Purpose & Success
-
-**Mission Statement**: A comprehensive world clock application that displays accurate times across multiple time zones with both analog and digital displays, user authentication, and popup functionality.
-
-**Success Indicators**: 
-- Users can quickly view times across multiple global time zones
-- Accurate time display accounting for daylight saving time
-- Seamless user experience with customizable settings
-- Reliable data persistence across sessions
-
-**Experience Qualities**: Professional, Accurate, Customizable
+- **Mission Statement**: A comprehensive world clock application that displays accurate time across multiple time zones with analog and digital displays, plus a time zone converter tool.
+- **Success Indicators**: Users can easily track multiple time zones, convert times between zones, and save their personalized configurations.
+- **Experience Qualities**: Professional, accurate, intuitive
 
 ## Project Classification & Approach
+- **Complexity Level**: Complex Application (advanced functionality, user accounts, persistent settings)
+- **Primary User Activity**: Monitoring, Converting, Configuring
 
-**Complexity Level**: Complex Application (advanced functionality, user accounts, server synchronization)
-
-**Primary User Activity**: Monitoring multiple time zones with real-time updates and personalization
+## Thought Process for Feature Selection
+- **Core Problem Analysis**: People need to track time across multiple global locations and convert times between different zones.
+- **User Context**: Business professionals, remote workers, travelers, and anyone coordinating across time zones.
+- **Critical Path**: View current times → Add/remove locations → Configure display preferences → Convert times between zones
+- **Key Moments**: Real-time accuracy, easy time conversion, settings persistence
 
 ## Essential Features
 
-### Core Time Display
-- **Real-time clock updates**: Live updating digital and analog clocks for multiple time zones
-- **Accurate time zones**: Properly handles daylight saving time transitions
-- **Multiple display formats**: Both 24-hour digital format and customizable analog clocks
+### Time Display
+- Multiple analog and digital clocks showing current time in different time zones
+- Accurate daylight saving time handling
+- Real-time updates every second
+- Customizable clock sizes and designs
+
+### Time Zone Management
+- Add/remove cities from a comprehensive list of global locations
+- Search functionality for cities, countries, and time zone abbreviations
+- Drag and drop reordering of clocks
+- Pop-up individual clocks in separate windows
+
+### Time Zone Converter
+- Convert times between all displayed time zones
+- Edit any time zone's date/time to see corresponding times in other zones
+- 24-hour format with date display
+- Day of week calculation
 
 ### User Management
-- **Account creation and authentication**: Secure user registration and login system
-- **Personal settings persistence**: User-specific settings saved to server
-- **Session management**: Automatic settings retrieval upon login
+- User account creation and authentication
+- Personal settings storage on server
+- Session management with automatic login
+- Settings persistence across devices
 
-### Customization Controls
-- **Font customization**: Adjustable font families and sizes for all text elements
-- **Analog clock styling**: 20 distinct designs with color customization
-- **Layout flexibility**: Adjustable clock sizes and responsive grid layout
-- **Visibility toggles**: Show/hide options for various clock elements
-
-### Interactive Features
-- **Drag and drop reordering**: Intuitive clock repositioning
-- **Add/remove clocks**: Comprehensive city selection with search functionality
-- **Settings management**: Collapsible configuration panels with logical grouping
-- **Popup windows**: Individual clocks can be opened in minimal popup windows
-
-### Data Persistence
-- **Local storage**: Immediate settings persistence during session
-- **Server synchronization**: Save/load settings to server for cross-device access
-- **User-specific data**: Isolated settings per user account
+### Customization
+- Adjustable font sizes for all text elements
+- Multiple font family options
+- 20+ analog clock designs with different themes
+- Color customization for analog clocks
+- Show/hide various display elements (seconds, numbers, etc.)
+- Responsive layout that adapts to different screen sizes
 
 ## Design Direction
 
 ### Visual Tone & Identity
-**Emotional Response**: The design should evoke professionalism, reliability, and precision while remaining approachable and user-friendly.
-
-**Design Personality**: Clean, modern, and functional with subtle elegance that emphasizes the precision of timekeeping.
-
-**Visual Metaphors**: Uses clock iconography and time-related visual cues to reinforce the application's purpose.
-
-**Simplicity Spectrum**: Balanced interface that provides comprehensive functionality without overwhelming users.
+- **Emotional Response**: Professional confidence and global connectivity
+- **Design Personality**: Clean, modern, sophisticated with subtle elegance
+- **Visual Metaphors**: Global time zones, precision instruments, business tools
+- **Simplicity Spectrum**: Clean interface with powerful functionality accessible through configuration
 
 ### Color Strategy
-**Color Scheme Type**: Monochromatic with selective accent colors
-
-**Primary Colors**: 
-- Background: Clean white (oklch(1 0 0))
-- Text: Deep blue-gray (oklch(0.25 0.15 240))
-
-**Secondary Colors**:
-- Cards: Light gray (oklch(0.97 0.01 240))
-- Muted elements: Medium gray (oklch(0.95 0.01 240))
-
-**Accent Color**: Bright cyan-blue (oklch(0.75 0.20 200)) for interactive elements and focus states
-
-**Color Psychology**: Professional blue tones convey trust and reliability, essential for a time-critical application.
+- **Color Scheme Type**: Monochromatic with subtle blue accents
+- **Primary Color**: Deep blue-gray (professional, trustworthy)
+- **Secondary Colors**: Lighter grays and whites for backgrounds
+- **Accent Color**: Bright blue for highlights and interactive elements
+- **Color Psychology**: Blues convey trust and precision, grays provide neutral professionalism
+- **Color Accessibility**: High contrast ratios maintained throughout
 
 ### Typography System
-**Font Pairing Strategy**: Single font family with varied weights and sizes for clear hierarchy
-
-**Primary Font**: Inter - clean, highly legible sans-serif optimized for digital displays
-
-**Typographic Hierarchy**:
-- Main title: Large, bold
-- Clock labels: Medium weight, appropriate sizing
-- Digital time: Bold, monospace characteristics for easy reading
-- Configuration text: Regular weight, smaller sizes
-
-**Typography Consistency**: All text elements respect user-customizable font family selections while maintaining consistent weight relationships.
+- **Font Pairing Strategy**: Single clean sans-serif family (Inter) for consistency
+- **Typographic Hierarchy**: Clear size relationships from large clock displays to small labels
+- **Font Personality**: Modern, legible, professional
+- **Readability Focus**: Tabular numerals for time display, generous spacing
+- **Typography Consistency**: User-selectable font family applied consistently across all elements
 
 ### Visual Hierarchy & Layout
-**Attention Direction**: Clock displays are the primary focus, with controls and configuration options secondary
-
-**Grid System**: Responsive CSS Grid that adapts to content size and screen width
-
-**Content Density**: Balanced spacing that allows multiple clocks to be visible while providing breathing room
-
-### Animations
-**Purposeful Motion**: Smooth transitions for configuration panel toggles and drag-and-drop interactions
-
-**Subtle Feedback**: Hover states and loading indicators provide immediate user feedback
-
-**Performance Optimized**: Minimal animations that don't interfere with time display accuracy
+- **Attention Direction**: Clocks as primary focus, controls secondary
+- **White Space Philosophy**: Generous spacing around elements for clarity
+- **Grid System**: Responsive grid that adapts to clock sizes and screen dimensions
+- **Responsive Approach**: Flexible layout that works on desktop and mobile
+- **Content Density**: Balanced information display without overcrowding
 
 ### UI Elements & Component Selection
-**Primary Components**:
-- Cards for clock displays with rounded corners and subtle shadows
-- Buttons with clear hierarchy (primary actions vs. secondary)
-- Form controls (sliders, dropdowns, checkboxes) for configuration
-- Modal-style panels for settings organization
+- **Component Usage**: Shadcn components for consistency and accessibility
+- **Component Customization**: Subtle rounded corners, consistent spacing
+- **Component States**: Clear hover, active, and disabled states
+- **Icon Selection**: Phosphor icons for actions, emoji for some visual elements
+- **Component Hierarchy**: Card-based layout for clocks, collapsible sections for settings
 
-**Interactive States**: All interactive elements have distinct hover, active, and disabled states
+### Accessibility & Readability
+- **Contrast Goal**: WCAG AA compliance maintained for all text and interactive elements
+- **Keyboard Navigation**: Full keyboard accessibility for all features
+- **Screen Reader Support**: Proper semantic markup and labels
 
-**Accessibility**: Proper focus management and keyboard navigation support
+## Implementation Considerations
+- **Scalability Needs**: Support for unlimited time zones
+- **Performance**: Efficient time updates without excessive re-renders  
+- **Data Persistence**: User settings and preferences saved to server
+- **Cross-Platform**: Works consistently across different browsers and devices
 
-## Implementation Features
+## Technical Features
 
-### Time Zone Management
-- Support for 175+ global cities including all US states and Canadian provinces
-- Accurate timezone handling with automatic DST adjustment
-- Real-time search and filtering for city selection
+### Time Zone Converter Recovery
+The time zone converter feature was missing and has been recovered with:
+- Calculator icon button in the header next to the add clock button
+- Converter panel that can be shown/hidden
+- Table format showing all current time zones
+- Editable date and time inputs for each zone
+- Automatic conversion when any time zone's time is modified
+- 24-hour format display without seconds
+- Date format in yyyy-mm-dd with day of week display
+- Hidden by default regardless of saved settings
 
-### Clock Customization
-- 20 distinct analog clock designs with radial gradients and decorative elements
-- Adjustable sizing from 50px to 500px for analog clocks
-- Color customization for clock hands, numbers, and frames
-- Font size adjustments for all text elements (10px to 100px range)
+### Time Accuracy
+- Proper handling of daylight saving time transitions
+- Correct time zone abbreviations (JST, IST, EST/EDT based on current season)
+- Real-time updates that reflect user's local system time
+- Accurate conversion calculations across all time zones
 
-### User Interface Features
-- Collapsible configuration sections for organized settings management
-- Drag-and-drop clock reordering with visual feedback
-- Real-time preview of setting changes
-- Responsive layout adapting to different screen sizes
-
-### Popup Window Feature
-- Individual clocks can be opened in minimal browser windows
-- Popup windows are sized to perfectly fit the clock content
-- Minimal window chrome (no menu bars, address bars, etc.)
-- Centered positioning on screen
-- Live updating time display in popup windows
-- Same styling and configuration as main application
-
-### Data Architecture
-- User-specific storage keys preventing data conflicts
-- Automatic server synchronization when authenticated
-- Graceful fallback to local storage for guest users
-- Settings validation and error handling
-
-## Technical Considerations
-- Real-time updates every second for accurate time display
-- Efficient DOM updates to prevent performance issues
-- Cross-browser compatibility for popup window functionality
-- Proper timezone data handling using Intl.DateTimeFormat API
-- Responsive design ensuring functionality across device sizes
-
-## Edge Cases & Problem Scenarios
-- Network connectivity issues during server synchronization
-- Browser popup blocking policies
-- Invalid timezone data or API failures
-- Large numbers of active clocks affecting performance
-- User settings corruption or migration
+## User Experience Flow
+1. **First Visit**: User sees default time zones, prompted to create account for saving settings
+2. **Account Creation**: Simple registration process with username, email, password
+3. **Configuration**: Access settings panel to customize display preferences
+4. **Time Zone Management**: Add/remove locations, reorder by dragging
+5. **Time Conversion**: Use calculator to convert times between zones
+6. **Settings Persistence**: Save/load settings to/from server with user account
+7. **Pop-up Windows**: Individual clocks can be opened in minimal browser windows
 
 ## Success Metrics
-- Accurate time display across all supported time zones
-- Seamless user authentication and data persistence
-- Responsive performance with multiple active clocks
-- Successful popup window functionality across browsers
-- Intuitive user experience requiring minimal learning curve
+- Accurate time display across all configured time zones
+- Smooth performance with multiple clocks updating in real-time
+- Reliable settings persistence and user session management
+- Intuitive time conversion workflow
+- Responsive design that works across devices

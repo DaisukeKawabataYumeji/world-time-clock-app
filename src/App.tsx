@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { Plus, Gear, X, CaretDown, CaretRight, SignOut, User as UserIcon, Download, Database, HardDrives, CloudArrowUp, ArrowSquareOut } from '@phosphor-icons/react'
+import { Plus, Gear, X, CaretDown, CaretRight, SignOut, User as UserIcon, Download, Database, HardDrives, CloudArrowUp, ArrowSquareOut, Calculator } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { UserProvider, useUser } from '@/contexts/UserContext'
@@ -309,12 +309,14 @@ function WorldClock() {
 
   const [showConfig, setShowConfig] = useState(false)
   const [showAddClock, setShowAddClock] = useState(false)
+  const [showTimeConverter, setShowTimeConverter] = useState(false)
   const [searchText, setSearchText] = useState('')
   const [currentTime, setCurrentTime] = useState(new Date())
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [openPopups, setOpenPopups] = useState<Map<string, Window>>(new Map())
+  const [converterTimes, setConverterTimes] = useState<{[key: string]: { date: string; time: string }}>>({})
 
   const [configSections, setConfigSections] = useState({
     common: true,
@@ -1216,6 +1218,95 @@ function WorldClock() {
     toast.success('Logged out successfully')
   }
 
+  const updateConverterTime = (timezoneId: string, newDate: string, newTime: string) => {
+    // Parse the new date and time for the specific timezone
+    const inputDateTime = new Date(`${newDate}T${newTime}:00`)
+    
+    // Get the timezone of the input
+    const inputTimezone = activeTimeZones.find(tz => tz.id === timezoneId)?.timeZone
+    if (!inputTimezone) return
+    
+    // Create a date object that represents the local time in the input timezone
+    const inputLocalTime = new Date(inputDateTime.toLocaleString("en-US", {timeZone: inputTimezone}))
+    const inputUTCTime = new Date(inputDateTime.getTime() + (inputDateTime.getTimezoneOffset() * 60000))
+    
+    // Calculate the difference between the input timezone and UTC
+    const inputTZDateTime = new Date(inputDateTime.toLocaleString("en-US", {timeZone: inputTimezone}))
+    const inputTZOffset = inputDateTime.getTime() - inputTZDateTime.getTime()
+    
+    // The actual UTC time is the input time adjusted by the timezone offset
+    const actualUTCTime = new Date(inputDateTime.getTime() - inputTZOffset)
+    
+    // Update all converter times based on this UTC time
+    const newConverterTimes: {[key: string]: { date: string; time: string }} = {}
+    
+    activeTimeZones.forEach(tz => {
+      const timeInZone = new Date(actualUTCTime.toLocaleString("en-US", {timeZone: tz.timeZone}))
+      const adjustedTime = new Date(actualUTCTime.getTime() + (actualUTCTime.getTimezoneOffset() * 60000))
+      
+      const formatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: tz.timeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+      
+      const parts = formatter.formatToParts(actualUTCTime)
+      const timeData = parts.reduce((acc, part) => {
+        acc[part.type] = part.value
+        return acc
+      }, {} as any)
+      
+      newConverterTimes[tz.id] = {
+        date: `${timeData.year}-${timeData.month}-${timeData.day}`,
+        time: `${timeData.hour}:${timeData.minute}`
+      }
+    })
+    
+    setConverterTimes(newConverterTimes)
+  }
+
+  // Initialize converter times when activeTimeZones changes
+  useEffect(() => {
+    if (activeTimeZones.length > 0) {
+      const now = new Date()
+      const initialTimes: {[key: string]: { date: string; time: string }} = {}
+      
+      activeTimeZones.forEach(tz => {
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+          timeZone: tz.timeZone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        })
+        
+        const parts = formatter.formatToParts(now)
+        const timeData = parts.reduce((acc, part) => {
+          acc[part.type] = part.value
+          return acc
+        }, {} as any)
+        
+        initialTimes[tz.id] = {
+          date: `${timeData.year}-${timeData.month}-${timeData.day}`,
+          time: `${timeData.hour}:${timeData.minute}`
+        }
+      })
+      
+      setConverterTimes(initialTimes)
+    }
+  }, [activeTimeZones])
+
+  const getWeekdayFromDate = (dateStr: string) => {
+    const date = new Date(dateStr + 'T00:00:00')
+    return date.toLocaleDateString('en-US', { weekday: 'short' })
+  }
+
   const AnalogClock = ({ timezone, size }: { timezone: TimeZoneInfo; size: number }) => {
     const timeParts = getTimeForZone(timezone.timeZone)
     const time = formatTime(timeParts, true)
@@ -1609,6 +1700,20 @@ function WorldClock() {
               <Button
                 variant="ghost"
                 size="lg"
+                onClick={() => setShowTimeConverter(!showTimeConverter)}
+                className="text-3xl p-2"
+                title="Time Zone Converter"
+              >
+                <img 
+                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQNXatp1EvAi1wW2Zuss7KIIkdRwJ_o0GlzA&s"
+                  alt="Calculator"
+                  width={36}
+                  height={36}
+                />
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
                 onClick={saveSettingsToServer}
                 disabled={isSaving || !user}
                 className="text-3xl p-2 hover:bg-accent/50"
@@ -1959,6 +2064,64 @@ function WorldClock() {
                   </div>
                 )}
               </div>
+            </div>
+          </Card>
+        )}
+
+        {showTimeConverter && (
+          <Card className="p-6 mb-10">
+            <h3 className="text-lg font-semibold mb-6">Time Zone Converter</h3>
+            <div className="space-y-4">
+              <div className="grid gap-4">
+                {activeTimeZones.map((timezone) => (
+                  <div key={timezone.id} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center p-4 bg-muted/50 rounded-lg">
+                    <div className="md:col-span-2">
+                      <div className="font-medium">{timezone.city}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {timezone.country} • {getCurrentTimeZoneAbbreviation(timezone.timeZone)}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Date</label>
+                      <Input
+                        type="date"
+                        value={converterTimes[timezone.id]?.date || ''}
+                        onChange={(e) => {
+                          const newDate = e.target.value
+                          const currentTime = converterTimes[timezone.id]?.time || '12:00'
+                          updateConverterTime(timezone.id, newDate, currentTime)
+                        }}
+                        className="text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Day</label>
+                      <div className="px-3 py-2 text-sm bg-background border rounded-md">
+                        {converterTimes[timezone.id]?.date ? getWeekdayFromDate(converterTimes[timezone.id].date) : ''}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Time (24h)</label>
+                      <Input
+                        type="time"
+                        value={converterTimes[timezone.id]?.time || ''}
+                        onChange={(e) => {
+                          const newTime = e.target.value
+                          const currentDate = converterTimes[timezone.id]?.date || new Date().toISOString().split('T')[0]
+                          updateConverterTime(timezone.id, currentDate, newTime)
+                        }}
+                        className="text-sm"
+                        step="60"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {activeTimeZones.length === 0 && (
+                <div className="text-center text-muted-foreground py-8">
+                  No time zones configured. Add some clocks first to use the converter.
+                </div>
+              )}
             </div>
           </Card>
         )}
