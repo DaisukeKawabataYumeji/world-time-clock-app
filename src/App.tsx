@@ -6,9 +6,13 @@ import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Plus, Gear, X, CaretDown, CaretRight, FloppyDisk } from '@phosphor-icons/react'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { Plus, Gear, X, CaretDown, CaretRight, FloppyDisk, SignOut, User as UserIcon, Download } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
+import { UserProvider, useUser } from '@/contexts/UserContext'
+import { UserAuth } from '@/components/UserAuth'
 
 interface TimeZoneInfo {
   id: string
@@ -87,8 +91,14 @@ const analogDesigns = [
 ]
 
 function WorldClock() {
-  const [activeTimeZones, setActiveTimeZones] = useKV<TimeZoneInfo[]>('world-clock-timezones', defaultTimeZones)
-  const [settings, setSettings] = useKV<ClockSettings>('world-clock-settings', {
+  const { user, logout } = useUser()
+  
+  // Use user-specific keys for settings storage
+  const userSettingsKey = user ? `world-clock-settings-${user.id}` : 'world-clock-settings'
+  const userTimezonesKey = user ? `world-clock-timezones-${user.id}` : 'world-clock-timezones'
+  
+  const [activeTimeZones, setActiveTimeZones] = useKV<TimeZoneInfo[]>(userTimezonesKey, defaultTimeZones)
+  const [settings, setSettings] = useKV<ClockSettings>(userSettingsKey, {
     showAnalog: true,
     fontFamily: 'Times New Roman',
     countryNameSize: 30,
@@ -104,6 +114,29 @@ function WorldClock() {
     analogNumberSize: true,
     analogNumberFontSize: 20
   })
+
+  // Load user's saved server settings when user changes
+  useEffect(() => {
+    const loadServerSettings = async () => {
+      if (user) {
+        try {
+          const serverSettings = await spark.kv.get<ClockSettings>(`world-clock-server-settings-${user.id}`)
+          const serverTimezones = await spark.kv.get<TimeZoneInfo[]>(`world-clock-server-timezones-${user.id}`)
+          
+          if (serverSettings) {
+            setSettings(serverSettings)
+          }
+          if (serverTimezones) {
+            setActiveTimeZones(serverTimezones)
+          }
+        } catch (error) {
+          console.error('Failed to load server settings:', error)
+        }
+      }
+    }
+    
+    loadServerSettings()
+  }, [user, setSettings, setActiveTimeZones])
 
   const [showConfig, setShowConfig] = useState(false)
   const [showAddClock, setShowAddClock] = useState(false)
@@ -198,11 +231,16 @@ function WorldClock() {
   }
 
   const saveSettingsToServer = async () => {
+    if (!user) {
+      toast.error('Please log in to save settings')
+      return
+    }
+    
     setIsSaving(true)
     try {
-      // Save settings to server using spark.kv API
-      await spark.kv.set('world-clock-server-settings', settings)
-      await spark.kv.set('world-clock-server-timezones', activeTimeZones)
+      // Save user-specific settings to server using spark.kv API
+      await spark.kv.set(`world-clock-server-settings-${user.id}`, settings)
+      await spark.kv.set(`world-clock-server-timezones-${user.id}`, activeTimeZones)
       
       // Show success notification
       toast.success('Settings saved to server successfully!')
@@ -212,6 +250,41 @@ function WorldClock() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const loadSettingsFromServer = async () => {
+    if (!user) {
+      toast.error('Please log in to load settings')
+      return
+    }
+    
+    setIsSaving(true)
+    try {
+      const serverSettings = await spark.kv.get<ClockSettings>(`world-clock-server-settings-${user.id}`)
+      const serverTimezones = await spark.kv.get<TimeZoneInfo[]>(`world-clock-server-timezones-${user.id}`)
+      
+      if (serverSettings || serverTimezones) {
+        if (serverSettings) {
+          setSettings(serverSettings)
+        }
+        if (serverTimezones) {
+          setActiveTimeZones(serverTimezones)
+        }
+        toast.success('Settings loaded from server successfully!')
+      } else {
+        toast.info('No saved settings found on server')
+      }
+    } catch (error) {
+      console.error('Failed to load settings from server:', error)
+      toast.error('Failed to load settings from server')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    await logout()
+    toast.success('Logged out successfully')
   }
 
   const AnalogClock = ({ timezone, size }: { timezone: TimeZoneInfo; size: number }) => {
@@ -546,38 +619,80 @@ function WorldClock() {
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between mb-10">
           <h1 className="text-4xl font-bold text-foreground">World Clock</h1>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={() => setShowAddClock(!showAddClock)}
-              className="text-3xl p-2"
-            >
-              ➕
-            </Button>
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={saveSettingsToServer}
-              disabled={isSaving}
-              className="text-2xl p-2 hover:bg-accent/50"
-              title="Save settings to server"
-            >
-              <FloppyDisk 
-                size={28} 
-                className={`${isSaving ? 'animate-pulse' : ''} text-primary`}
-              />
-            </Button>
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={() => setShowConfig(!showConfig)}
-              className="text-3xl p-2"
-            >
-              ⚙️
-            </Button>
+          <div className="flex items-center gap-4">
+            {user && (
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center gap-2 p-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src="" />
+                        <AvatarFallback className="bg-primary text-primary-foreground">
+                          {user.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="hidden sm:inline font-medium">{user.username}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem disabled>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      {user.email}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                      <SignOut className="mr-2 h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => setShowAddClock(!showAddClock)}
+                className="text-3xl p-2"
+              >
+                ➕
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={saveSettingsToServer}
+                disabled={isSaving || !user}
+                className="text-2xl p-2 hover:bg-accent/50"
+                title={user ? "Save settings to server" : "Login required to save settings"}
+              >
+                <FloppyDisk 
+                  size={28} 
+                  className={`${isSaving ? 'animate-pulse' : ''} ${user ? 'text-primary' : 'text-muted-foreground'}`}
+                />
+              </Button>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => setShowConfig(!showConfig)}
+                className="text-3xl p-2"
+              >
+                ⚙️
+              </Button>
+            </div>
           </div>
         </div>
+
+        {!user && (
+          <Card className="p-4 mb-6 bg-muted/50 border-dashed">
+            <div className="text-center text-muted-foreground">
+              <div className="text-sm">
+                ⚠️ You are using the application without an account. 
+                <br />
+                Your settings will not be saved. Please log in to save your preferences.
+              </div>
+            </div>
+          </Card>
+        )}
 
         {showAddClock && (
           <Card className="p-6 mb-6">
@@ -613,7 +728,33 @@ function WorldClock() {
 
         {showConfig && (
           <Card className="p-6 mb-10">
-            <h3 className="text-lg font-semibold mb-6">Configuration</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold">Configuration</h3>
+              {user && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={loadSettingsFromServer}
+                    disabled={isSaving}
+                    className="flex items-center gap-2"
+                  >
+                    <Download size={16} />
+                    Load from Server
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={saveSettingsToServer}
+                    disabled={isSaving}
+                    className="flex items-center gap-2"
+                  >
+                    <FloppyDisk size={16} />
+                    Save to Server
+                  </Button>
+                </div>
+              )}
+            </div>
             
             <div className="space-y-6">
               <div>
@@ -879,4 +1020,31 @@ function WorldClock() {
   )
 }
 
-export default WorldClock
+function WorldClockApp() {
+  const { user, login, isLoading } = useUser()
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-2xl font-bold mb-2">World Clock</div>
+          <div className="text-muted-foreground">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <UserAuth onLogin={login} />
+  }
+
+  return <WorldClock />
+}
+
+export default function App() {
+  return (
+    <UserProvider>
+      <WorldClockApp />
+    </UserProvider>
+  )
+}
