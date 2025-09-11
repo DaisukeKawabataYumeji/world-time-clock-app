@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
-import { Plus, Gear, X, CaretDown, CaretRight, SignOut, User as UserIcon, Download, Database, HardDrives, CloudArrowUp } from '@phosphor-icons/react'
+import { Plus, Gear, X, CaretDown, CaretRight, SignOut, User as UserIcon, Download, Database, HardDrives, CloudArrowUp, ArrowSquareOut } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { Toaster } from '@/components/ui/sonner'
 import { UserProvider, useUser } from '@/contexts/UserContext'
@@ -399,7 +399,281 @@ function WorldClock() {
     setDragOverIndex(null)
   }
 
-  const saveSettingsToServer = async () => {
+  const openClockPopup = (timezone: TimeZoneInfo) => {
+    // Calculate popup window size based on settings
+    const popupWidth = Math.max(
+      settings.showAnalog ? settings.analogClockSize + 80 : 280,
+      Math.max(
+        timezone.country.length * settings.countryNameSize * 0.6 + 40,
+        timezone.city.length * settings.cityNameSize * 0.6 + 40,
+        '00:00:00'.length * settings.digitalTimeSize * 0.6 + 40
+      )
+    )
+    
+    const popupHeight = settings.showAnalog 
+      ? settings.analogClockSize + 250 
+      : 200
+
+    // Center the popup on screen
+    const left = (window.screen.width - popupWidth) / 2
+    const top = (window.screen.height - popupHeight) / 2
+
+    // Create popup window with minimal features
+    const popup = window.open(
+      '', 
+      `clock-${timezone.id}`,
+      `width=${popupWidth},height=${popupHeight},left=${left},top=${top},resizable=yes,scrollbars=no,menubar=no,toolbar=no,location=no,status=no`
+    )
+
+    if (popup) {
+      // Create the popup content
+      const popupContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${timezone.city} - ${timezone.country}</title>
+          <style>
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            
+            body {
+              font-family: ${settings.fontFamily}, sans-serif;
+              background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+              padding: 20px;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            
+            .clock-container {
+              background: white;
+              border-radius: 12px;
+              padding: 24px;
+              box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+              text-align: center;
+              border: 1px solid #e2e8f0;
+            }
+            
+            .country-name {
+              font-size: ${settings.countryNameSize}px;
+              font-weight: 600;
+              color: #1e293b;
+              margin-bottom: 4px;
+            }
+            
+            .city-name {
+              font-size: ${settings.cityNameSize}px;
+              font-weight: 500;
+              color: #334155;
+              margin-bottom: 4px;
+            }
+            
+            .timezone-abbr {
+              font-size: ${settings.timeZoneSize}px;
+              color: #64748b;
+              margin-bottom: 16px;
+            }
+            
+            .digital-date {
+              font-size: ${settings.digitalDateSize}px;
+              color: #64748b;
+              margin-bottom: 8px;
+            }
+            
+            .digital-time {
+              font-size: ${settings.digitalTimeSize}px;
+              font-weight: bold;
+              color: #1e293b;
+              font-variant-numeric: tabular-nums;
+              margin-bottom: ${settings.showAnalog ? '20px' : '0'};
+            }
+            
+            .analog-clock-container {
+              display: flex;
+              justify-content: center;
+              margin-top: 16px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="clock-container">
+            <div class="country-name">${timezone.country}</div>
+            <div class="city-name">${timezone.city}</div>
+            <div class="timezone-abbr">${timezone.abbreviation}</div>
+            <div class="digital-date" id="date"></div>
+            <div class="digital-time" id="time"></div>
+            ${settings.showAnalog ? '<div class="analog-clock-container" id="analog-clock"></div>' : ''}
+          </div>
+          
+          <script>
+            const timezone = '${timezone.timeZone}';
+            const showDigitalSeconds = ${settings.showDigitalSeconds};
+            const showAnalog = ${settings.showAnalog};
+            const showAnalogSeconds = ${settings.showAnalogSeconds};
+            const analogClockSize = ${settings.analogClockSize};
+            const analogClockDesign = '${settings.analogClockDesign}';
+            const analogClockColor = '${settings.analogClockColor}';
+            const analogNumberSize = ${settings.analogNumberSize};
+            const analogNumberFontSize = ${settings.analogNumberFontSize};
+            const fontFamily = '${settings.fontFamily}';
+            
+            const getDesignStyles = (design) => {
+              const designs = {
+                'Classic Elegance': {
+                  background: 'radial-gradient(circle, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%)',
+                  shadow: '0 8px 32px rgba(33, 37, 41, 0.3)',
+                  border: '4px solid #6c757d',
+                  decoration: 'linear-gradient(45deg, #495057, #6c757d)'
+                },
+                'Modern Minimalist': {
+                  background: 'radial-gradient(circle, #ffffff 0%, #f8f9fa 70%, #e9ecef 100%)',
+                  shadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+                  border: '2px solid #dee2e6',
+                  decoration: 'linear-gradient(45deg, #adb5bd, #ced4da)'
+                },
+                'Vintage Brass': {
+                  background: 'radial-gradient(circle, #fff8e1 0%, #ffecb3 50%, #ffc107 100%)',
+                  shadow: '0 8px 32px rgba(255, 193, 7, 0.4)',
+                  border: '6px solid #ff8f00',
+                  decoration: 'linear-gradient(45deg, #ff6f00, #ff8f00)'
+                },
+                'Ocean Blue': {
+                  background: 'radial-gradient(circle, #e3f2fd 0%, #bbdefb 50%, #2196f3 100%)',
+                  shadow: '0 8px 32px rgba(33, 150, 243, 0.4)',
+                  border: '4px solid #1976d2',
+                  decoration: 'linear-gradient(45deg, #0d47a1, #1976d2)'
+                }
+              };
+              return designs[design] || designs['Classic Elegance'];
+            };
+            
+            function updateClock() {
+              const now = new Date();
+              const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone: timezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+                weekday: 'short'
+              });
+              
+              const parts = formatter.formatToParts(now);
+              const timeData = parts.reduce((acc, part) => {
+                acc[part.type] = part.value;
+                return acc;
+              }, {});
+              
+              const timeStr = showDigitalSeconds 
+                ? timeData.hour + ':' + timeData.minute + ':' + timeData.second
+                : timeData.hour + ':' + timeData.minute;
+                
+              const dateStr = timeData.year + '-' + timeData.month + '-' + timeData.day + ' ' + timeData.weekday;
+              
+              document.getElementById('date').textContent = dateStr;
+              document.getElementById('time').textContent = timeStr;
+              
+              if (showAnalog) {
+                updateAnalogClock(parseInt(timeData.hour), parseInt(timeData.minute), parseInt(timeData.second));
+              }
+            }
+            
+            function updateAnalogClock(hours, minutes, seconds) {
+              const analogContainer = document.getElementById('analog-clock');
+              if (!analogContainer) return;
+              
+              const hourAngle = (hours % 12) * 30 + minutes * 0.5;
+              const minuteAngle = minutes * 6;
+              const secondAngle = seconds * 6;
+              const designStyles = getDesignStyles(analogClockDesign);
+              
+              analogContainer.innerHTML = \`
+                <div style="position: relative; width: \${analogClockSize}px; height: \${analogClockSize}px;">
+                  <div style="
+                    position: absolute;
+                    background: \${designStyles.decoration};
+                    width: \${analogClockSize + 16}px;
+                    height: \${analogClockSize + 16}px;
+                    left: -8px;
+                    top: -8px;
+                    border-radius: 50%;
+                  "></div>
+                  <svg width="\${analogClockSize}" height="\${analogClockSize}" style="
+                    position: relative;
+                    border-radius: 50%;
+                    background: \${designStyles.background};
+                    box-shadow: \${designStyles.shadow};
+                    border: 4px solid \${analogClockColor};
+                  ">
+                    <defs>
+                      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+                      </filter>
+                    </defs>
+                    
+                    \${analogNumberSize ? Array.from({ length: 12 }, (_, i) => {
+                      const angle = (i + 1) * 30 - 90;
+                      const x = analogClockSize/2 + (analogClockSize/2 - 30) * Math.cos(angle * Math.PI / 180);
+                      const y = analogClockSize/2 + (analogClockSize/2 - 30) * Math.sin(angle * Math.PI / 180);
+                      return \`<text x="\${x}" y="\${y}" text-anchor="middle" dominant-baseline="central" 
+                        font-size="\${analogNumberFontSize}" font-family="\${fontFamily}" 
+                        fill="\${analogClockColor}" font-weight="bold" filter="url(#shadow)">\${i + 1}</text>\`;
+                    }).join('') : ''}
+                    
+                    <line x1="\${analogClockSize/2}" y1="\${analogClockSize/2}"
+                          x2="\${analogClockSize/2 + (analogClockSize/4) * Math.cos((hourAngle - 90) * Math.PI / 180)}"
+                          y2="\${analogClockSize/2 + (analogClockSize/4) * Math.sin((hourAngle - 90) * Math.PI / 180)}"
+                          stroke="\${analogClockColor}" stroke-width="6" stroke-linecap="round" filter="url(#shadow)" />
+                    
+                    <line x1="\${analogClockSize/2}" y1="\${analogClockSize/2}"
+                          x2="\${analogClockSize/2 + (analogClockSize/3) * Math.cos((minuteAngle - 90) * Math.PI / 180)}"
+                          y2="\${analogClockSize/2 + (analogClockSize/3) * Math.sin((minuteAngle - 90) * Math.PI / 180)}"
+                          stroke="\${analogClockColor}" stroke-width="4" stroke-linecap="round" filter="url(#shadow)" />
+                    
+                    \${showAnalogSeconds ? \`<line x1="\${analogClockSize/2}" y1="\${analogClockSize/2}"
+                          x2="\${analogClockSize/2 + (analogClockSize/2.5) * Math.cos((secondAngle - 90) * Math.PI / 180)}"
+                          y2="\${analogClockSize/2 + (analogClockSize/2.5) * Math.sin((secondAngle - 90) * Math.PI / 180)}"
+                          stroke="#ef4444" stroke-width="2" stroke-linecap="round" filter="url(#shadow)" />\` : ''}
+                    
+                    <circle cx="\${analogClockSize/2}" cy="\${analogClockSize/2}" r="8" 
+                            fill="\${analogClockColor}" filter="url(#shadow)" />
+                  </svg>
+                </div>
+              \`;
+            }
+            
+            // Update immediately and then every second
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            // Handle window close
+            window.addEventListener('beforeunload', () => {
+              // Clean up if needed
+            });
+          </script>
+        </body>
+        </html>
+      `
+
+      popup.document.write(popupContent)
+      popup.document.close()
+      
+      // Set window title
+      popup.document.title = `${timezone.city} - ${timezone.country}`
+      
+      // Focus the popup
+      popup.focus()
+    }
+  }
     if (!user) {
       toast.error('Please log in to save settings')
       return
@@ -718,6 +992,15 @@ function WorldClock() {
         onDrop={() => handleDrop(index)}
       >
         <div className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute -top-2 -left-2 h-6 w-6 p-0 text-accent hover:text-accent-foreground hover:bg-accent z-10"
+            onClick={() => openClockPopup(timezone)}
+            title="Open in popup window"
+          >
+            <ArrowSquareOut size={14} />
+          </Button>
           <Button
             variant="ghost"
             size="sm"
